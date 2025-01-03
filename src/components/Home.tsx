@@ -1,56 +1,35 @@
 import React from "react";
 import SalonPage from "../pages/salon/Salon";
 import MastersCard from "./masters/MastersCard";
-import img from "../assets/logo.png";
-export const specialists = [
-  {
-    id: 1,
-    name: "Иван Иванов",
-    title: "Стрижка",
-    phone: "+7 (123) 456-78-90",
-    image: img,
-  },
-  {
-    id: 2,
-    name: "Петр Петров",
-    title: "Маникюр",
-    phone: "+7 (123) 456-78-90",
-    image: img,
-  },
-  {
-    id: 3,
-    name: "Петр Петров",
-    title: "Маникюр",
-    phone: "+7 (123) 456-78-90",
-    image: img,
-  },
-  {
-    id: 4,
-    name: "Петр Петров",
-    title: "Маникюр",
-    phone: "+7 (123) 456-78-90",
-    image: img,
-  },
-  {
-    id: 5,
-    name: "Петр Петров",
-    title: "Маникюр",
-    phone: "+7 (123) 456-78-90",
-    image: img,
-  },
-  {
-    id: 6,
-    name: "Петр Петров",
-    title: "Маникюр",
-    phone: "+7 (123) 456-78-90",
-    image: img,
-  },
-];
+import { useGetSalonBySlugQuery } from "../api/SalonApi";
+import Container from "../pages/Container";
+import { useParams } from "react-router-dom";
+
 const Home: React.FC = () => {
+  const {slug} = useParams()
+  // const slug = "ulybkaaa";
+  const { data: salonData, isLoading, isError } = useGetSalonBySlugQuery(slug);
+    if (isLoading) {
+      return (
+        <Container>
+          <p>Загрузка данных салона...</p>
+        </Container>
+      );
+    }
+
+    if (isError || !salonData) {
+      return (
+        <Container>
+          <p>Ошибка при получении данных салона. Попробуйте позже.</p>
+        </Container>
+      );
+    }
+    const salon = salonData?.data;
+    const specialists = salon?.masters;
   return (
     <div className="flex flex-col justify-between">
-      <SalonPage /> 
-       <MastersCard specialists={specialists} />
+      <SalonPage salon={salon} /> 
+       <MastersCard specialists={specialists} setSelectedMaster={() => {}} />
       
     </div>
   );

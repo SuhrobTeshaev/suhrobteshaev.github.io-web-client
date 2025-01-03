@@ -1,108 +1,54 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Collapse } from "@mui/material"; 
 import icontop from '../../assets/Vector2.png'
 import iconbottom from "../../assets/Vector.png";
 
 
-type Service = {
-  id: number;
-  name: string;
-  price: string;
-  duration: string;
-};
+interface ServiceCardProps {
+  masters: any;
+  selectedServices: Set<{
+    id: number;
+    price: number;
+    duration: number;
+    name: string;
+  }>;
+  setSelectedServices: React.Dispatch<
+    React.SetStateAction<
+      Set<{
+        id: number;
+        price: number;
+        duration: number;
+        name: string;
+      }>
+    >
+  >;
+}
 
-type Category = {
-  name: string;
-  services: Service[];
-};
-
-const categories: Category[] = [
-  {
-    name: "Стрижки",
-    services: [
-      { id: 1, name: "Стрижка кроп", price: "50 TJS", duration: "1 час" },
-      { id: 2, name: "Экзекьютив", price: "60 TJS", duration: "20 мин" },
-      { id: 3, name: "Андеркат", price: "50 TJS", duration: "1 час" },
-      { id: 4, name: "Фейд", price: "75 TJS", duration: "1 час" },
-    ],
-  },
-  {
-    name: "Маникюр",
-    services: [
-      {
-        id: 5,
-        name: "Маникюр классический",
-        price: "100 TJS",
-        duration: "1 час",
-      },
-      {
-        id: 6,
-        name: "Маникюр с покрытием",
-        price: "150 TJS",
-        duration: "1.5 часа",
-      },
-    ],
-  },
-  {
-    name: "Чистка лица",
-    services: [
-      {
-        id: 7,
-        name: "Ультразвуковая чистка",
-        price: "120 TJS",
-        duration: "1 час",
-      },
-      {
-        id: 8,
-        name: "Механическая чистка",
-        price: "140 TJS",
-        duration: "1.5 часа",
-      },
-    ],
-  },
-  {
-    name: "test",
-    services: [
-      { id: 9, name: "Стрижка кроп", price: "50 TJS", duration: "1 час" },
-      { id: 10, name: "Экзекьютив", price: "60 TJS", duration: "20 мин" },
-      { id: 11, name: "Андеркат", price: "50 TJS", duration: "1 час" },
-      { id: 12, name: "Фейд", price: "75 TJS", duration: "1 час" },
-    ],
-  },
-  {
-    name: "Стрижки",
-    services: [
-      { id: 1, name: "Стрижка кроп", price: "50 TJS", duration: "1 час" },
-      { id: 2, name: "Экзекьютив", price: "60 TJS", duration: "20 мин" },
-      { id: 3, name: "Андеркат", price: "50 TJS", duration: "1 час" },
-      { id: 4, name: "Фейд", price: "75 TJS", duration: "1 час" },
-    ],
-  },
-  {
-    name: "Стрижки",
-    services: [
-      { id: 1, name: "Стрижка кроп", price: "50 TJS", duration: "1 час" },
-      { id: 2, name: "Экзекьютив", price: "60 TJS", duration: "20 мин" },
-      { id: 3, name: "Андеркат", price: "50 TJS", duration: "1 час" },
-      { id: 4, name: "Фейд", price: "75 TJS", duration: "1 час" },
-    ],
-  },
-  {
-    name: "Стрижки",
-    services: [
-      { id: 1, name: "Стрижка кроп", price: "50 TJS", duration: "1 час" },
-      { id: 2, name: "Экзекьютив", price: "60 TJS", duration: "20 мин" },
-      { id: 3, name: "Андеркат", price: "50 TJS", duration: "1 час" },
-      { id: 4, name: "Фейд", price: "75 TJS", duration: "1 час" },
-    ],
-  },
-];
-
-const ServiceCard: React.FC = () => {
+const ServiceCard: React.FC<ServiceCardProps> = ({
+  masters,
+  setSelectedServices,
+  selectedServices,
+}) => {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
-  const [selectedServices, setSelectedServices] = useState<Set<number>>(
-    new Set()
-  );
+  // const [selectedServices, setSelectedServices] = useState<Set<number>>(
+  //   new Set()
+  // );
+  useEffect(() => {
+    const savedServices = localStorage.getItem("selectedServices");
+    if (savedServices) {
+      setSelectedServices(new Set(JSON.parse(savedServices)));
+    }
+  }, [setSelectedServices]);
+
+  // Сохранение состояния selectedServices в localStorage при изменении
+  useEffect(() => {
+    if (selectedServices.size > 0) {
+      localStorage.setItem(
+        "selectedServices",
+        JSON.stringify([...selectedServices])
+      );
+    }
+  }, [selectedServices]);
 
   const toggleCategory = (categoryName: string) => {
     setExpandedCategory((prev) =>
@@ -110,43 +56,51 @@ const ServiceCard: React.FC = () => {
     );
   };
 
-  const toggleService = (serviceId: number) => {
+  const toggleService = (service: {
+    id: number;
+    price: number;
+    duration: number;
+    name: string;
+  }) => {
     setSelectedServices((prev) => {
       const updated = new Set(prev);
-      if (updated.has(serviceId)) {
-        updated.delete(serviceId);
+      const existing = [...updated].find((item) => item.id === service.id);
+      if (existing) {
+        updated.delete(existing); // Убираем услугу, если она уже выбрана
       } else {
-        updated.add(serviceId);
+        updated.add(service); // Добавляем услугу, если она не выбрана
       }
       return updated;
     });
   };
 
+
+
   return (
     <div className="min-h-[calc(4*7rem)] overflow-y-auto max-h-[calc(4*7rem)]">
-      {categories.map((category) => (
-        <div key={category.name} className="my-6 ">
+      {masters?.directions?.map((direction: any) => (
+        <div key={direction.id} className="my-6 ">
           <div
             className="flex justify-between items-center cursor-pointer border-b pb-4"
-            onClick={() => toggleCategory(category.name)}
+            onClick={() => toggleCategory(direction.name)}
           >
             <h2 className="bigMobile:text-base flex gap-2 font-medium text-[#262626]">
-              {category.name}
+              {direction.name}
               <span className="text-[#E87248]">
-                ({category.services.length})
+                ({direction.services.length})
               </span>
             </h2>
             <span className="mr-3">
-              {expandedCategory === category.name ? (
+              {expandedCategory === direction.name ? (
                 <img src={iconbottom} alt="top" />
               ) : (
                 <img src={icontop} alt="top" />
               )}
             </span>
           </div>
-          <Collapse in={expandedCategory === category.name}>
+          <Collapse in={expandedCategory === direction.name}>
             <div className="mt-3 space-y-3">
-              {category.services.map((service) => (
+              {direction.services.map((service: any) => (
                 <div
                   key={service.id}
                   className={`flex justify-between items-center p-3  ${
@@ -154,12 +108,14 @@ const ServiceCard: React.FC = () => {
                       ? "border-orange-500 bg-[#F5F5F5] rounded-lg"
                       : "border-gray-300"
                   }`}
-                  onClick={() => toggleService(service.id)}
+                  onClick={() => toggleService(service)}
                 >
                   <div className="flex gap-2 flex-row items-center ">
                     <input
                       type="checkbox"
-                      className="h-4 w-4 border-gray-300 text-orange-500 after:ring-orange-500"
+                      defaultChecked={true}
+                      onChange={() => toggleService(service)}
+                      className="h-4 w-4 border-gray-300 text-orange-500 bg-white "
                     />
                     <p className="text-[#262626] font-medium">{service.name}</p>
                   </div>

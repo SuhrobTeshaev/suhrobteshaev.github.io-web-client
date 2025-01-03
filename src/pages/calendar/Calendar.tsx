@@ -9,8 +9,17 @@ const CalendarPage: React.FC = () => {
       <h1 className="text-2xl font-bold text-gray-800 mb-4">
         Выберите дату и время
       </h1>
-      <Calendar />
-      <div className="mt-4 flex flex-wrap gap-2">
+      <Calendar
+        setSelectedDate={() => {}}
+        setSelectedTime={() => {}}
+        selectedDate={null}
+        selectedTime={null}
+        selectedServices={new Set()}
+        masterId={0}
+        currentDate={new Date()}
+        setCurrentDate={() => {}}
+      />
+      {/* <div className="mt-4 flex flex-wrap gap-2">
         {["10:00", "11:00", "12:00", "13:00"].map((time) => (
           <span
             key={time}
@@ -19,7 +28,7 @@ const CalendarPage: React.FC = () => {
             {time}
           </span>
         ))}
-      </div>
+      </div> */}
     </Container>
   );
 };
